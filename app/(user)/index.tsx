@@ -15,7 +15,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useSession } from "@/providers/authProvider";
 import { useIsFocused } from "@react-navigation/native";
-import { allTask } from "@/utils/storage";
+import { allTask, deleteTask } from "@/utils/storage";
 
 interface TasksTypes {
   title: string;
@@ -24,23 +24,24 @@ interface TasksTypes {
   dueDate: Date;
   date: Date;
   user: string;
-  check:boolean
+  check: boolean;
 }
 export default function HomeScreen() {
   const [data, setData] = useState<TasksTypes[]>([]);
   const { session } = useSession();
   const isFocused = useIsFocused();
+  const [reload, setReload] = useState(0);
   useEffect(() => {
     const getData = async () => {
       try {
-        const localData = await allTask(session as string)
+        const localData = await allTask(session as string);
         setData(localData);
       } catch (error) {
         console.error(error);
       }
     };
-    getData()
-  }, [isFocused]);
+    getData();
+  }, [isFocused, reload]);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -57,12 +58,17 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </ThemedView>
       {data.map((doc, i) => (
-        <TaskCard dueDate={doc.dueDate} 
-        title={doc.title}
-        id={doc.id}
-        check={doc.check}
-        onDelete={()=>{}}
-         key={i} />
+        <TaskCard
+          dueDate={doc.dueDate}
+          title={doc.title}
+          id={doc.id}
+          check={doc.check}
+          onDelete={async () => {
+            await deleteTask(doc.id);
+            setReload(Math.random());
+          }}
+          key={i}
+        />
       ))}
     </ParallaxScrollView>
   );

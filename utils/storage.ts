@@ -118,3 +118,17 @@ export const updateTask = async (title: string, image: string, dueDate: Date,id:
     const jsonValue = JSON.stringify(newVal);
     return await AsyncStorage.setItem('tasks', jsonValue);
 }
+export const deleteTask = async (id:string) => {
+    const oldValue = await AsyncStorage.getItem('tasks') as string
+    const data = JSON.parse(oldValue) as TasksTypes[]
+    const newVal = data.filter(d=>d.id!=id)
+    //console.log(newVal)
+    const jsonValue = JSON.stringify(newVal);
+    return await AsyncStorage.setItem('tasks', jsonValue);
+}
+export const getTask = async (id: string) => {
+    const oldValue = await AsyncStorage.getItem('tasks') as string
+    const data = JSON.parse(oldValue) as TasksTypes[]
+
+    return data.find(d=>d.id===id)
+}
