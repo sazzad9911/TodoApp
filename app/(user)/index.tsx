@@ -12,8 +12,35 @@ import { ThemedView } from "@/components/ThemedView";
 import TaskCard from "@/components/TaskCard";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { useSession } from "@/providers/authProvider";
+import { useIsFocused } from "@react-navigation/native";
+import { allTask } from "@/utils/storage";
 
+interface TasksTypes {
+  title: string;
+  image: string;
+  id: string;
+  dueDate: Date;
+  date: Date;
+  user: string;
+  check:boolean
+}
 export default function HomeScreen() {
+  const [data, setData] = useState<TasksTypes[]>([]);
+  const { session } = useSession();
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const localData = await allTask(session as string)
+        setData(localData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getData()
+  }, [isFocused]);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -22,16 +49,20 @@ export default function HomeScreen() {
           source={require("@/assets/images/task.jpg")}
           style={styles.reactLogo}
         />
-      }
-    >
+      }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Tasks</ThemedText>
-        <TouchableOpacity onPress={()=>router.push("/create-task")}>
+        <TouchableOpacity onPress={() => router.push("/create-task")}>
           <Feather name="plus-circle" size={26} color="green" />
         </TouchableOpacity>
       </ThemedView>
-      {[45, 34, 23, 3, 3, 3, 2, 2, 2, 2, 3].map((d, i) => (
-        <TaskCard key={i} />
+      {data.map((doc, i) => (
+        <TaskCard dueDate={doc.dueDate} 
+        title={doc.title}
+        id={doc.id}
+        check={doc.check}
+        onDelete={()=>{}}
+         key={i} />
       ))}
     </ParallaxScrollView>
   );

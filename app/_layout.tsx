@@ -50,6 +50,7 @@ export default function RootLayout() {
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="signup" options={{ headerShown: false }} />
             <Stack.Screen name="create-task" options={{ header:()=><BackHeader title="Create Task" />}} />
+            <Stack.Screen name="details/[id]" options={{ header:()=><BackHeader title="Task Details" />}} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </View>

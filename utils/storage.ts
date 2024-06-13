@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid'
 // const storeData = async (value) => {
 //     try {
 //         const jsonValue = JSON.stringify(value);
@@ -44,4 +45,76 @@ export const findUser = async (value: UserTypes) => {
         return `${value.email}+${value.password}`
     }
     return null
+}
+interface TasksTypes {
+    title: string,
+    image: string,
+    id: string,
+    dueDate: Date
+    date: Date,
+    user: string,
+    check: boolean
+}
+export const storeTask = async (title: string, image: string, dueDate: Date, user: string) => {
+    const oldValue = await AsyncStorage.getItem('tasks');
+    let List: TasksTypes[] = []
+    if (oldValue) {
+        const old = JSON.parse(oldValue) as TasksTypes[]
+        old?.map(d => {
+            List.push(d)
+        })
+    }
+
+
+    List.push({
+        id: uuid.v1().toString(),
+        date: new Date(),
+        dueDate: dueDate,
+        image: image,
+        user: user,
+        title: title,
+        check: false
+    })
+    const jsonValue = JSON.stringify(List);
+    return await AsyncStorage.setItem('tasks', jsonValue);
+}
+export const allTask = async (user: string) => {
+    const oldValue = await AsyncStorage.getItem('tasks') as string
+    const jsonValue = JSON.parse(oldValue) as TasksTypes[]
+
+    return jsonValue.filter(d => d.user === user)
+}
+export const checkTask = async (id: string, check: boolean) => {
+    const oldValue = await AsyncStorage.getItem('tasks') as string
+    const data = JSON.parse(oldValue) as TasksTypes[]
+    const newVal = data.map(d => {
+        if (d.id === id) {
+            return {
+                ...d,
+                check: check
+            }
+        }
+        return d
+    })
+    //console.log(newVal)
+    const jsonValue = JSON.stringify(newVal);
+    return await AsyncStorage.setItem('tasks', jsonValue);
+}
+export const updateTask = async (title: string, image: string, dueDate: Date,id:string) => {
+    const oldValue = await AsyncStorage.getItem('tasks') as string
+    const data = JSON.parse(oldValue) as TasksTypes[]
+    const newVal = data.map(d => {
+        if (d.id === id) {
+            return {
+                ...d,
+                title:title,
+                image:image,
+                dueDate:dueDate,
+            }
+        }
+        return d
+    })
+    //console.log(newVal)
+    const jsonValue = JSON.stringify(newVal);
+    return await AsyncStorage.setItem('tasks', jsonValue);
 }

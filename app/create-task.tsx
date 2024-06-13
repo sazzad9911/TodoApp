@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -13,9 +14,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import Button from "@/components/Button";
 import DateTime from "@/components/DateTime";
 import getTimeFromDate from "@/utils/getTimeFromDate";
+import * as ImagePicker from "expo-image-picker";
+import { useSession } from "@/providers/authProvider";
+import { storeTask } from "@/utils/storage";
+import { router } from "expo-router";
 
 interface InputTypes {
-  image: string;
   title: string;
   date: Date;
   time: Date;
@@ -23,13 +27,14 @@ interface InputTypes {
 
 export default function CreateTask() {
   const [inputs, setInputs] = useState<InputTypes>({
-    image: "",
     title: "",
     date: new Date(),
     time: new Date(),
   });
+  const [image, setImage] = useState<string | null>(null);
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
+  const { session } = useSession();
 
   const onChangeDate = (event: any, date: any) => {
     setShowDate(false);
@@ -39,23 +44,54 @@ export default function CreateTask() {
     setShowTime(false);
     setInputs((d) => ({ ...d, time: time }));
   };
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled && result?.assets?.[0].uri) {
+      setImage(result.assets[0].uri);
+    }
+  };
+  const handleSubmit = async () => {
+    if (!image || !inputs.title || !inputs.date || !inputs.time) {
+      return Alert.alert("Please fill the inputs");
+    }
+
+    try {
+      const dueDate = new Date(inputs.date);
+      dueDate.setHours(inputs.time.getHours());
+      dueDate.setMinutes(inputs.time.getMinutes());
+      dueDate.setSeconds(inputs.time.getSeconds());
+      await storeTask(inputs.title, image, dueDate, session as string);
+      router.back();
+    } catch (error:any) {
+      console.log(error);
+      Alert.alert(error.message);
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <ParallaxScrollView
         headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
         headerImage={
-          <View style={{ flex: 1 }}>
-            <Image
-              source={require("@/assets/images/task.jpg")}
-              style={styles.reactLogo}
-            />
-            <TouchableOpacity style={styles.cameraIcon}>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.reactLogo} />
+            ) : (
+              <Text>No image Uploaded</Text>
+            )}
+            <TouchableOpacity onPress={pickImage} style={styles.cameraIcon}>
               <MaterialIcons name="photo-camera" size={24} color="white" />
             </TouchableOpacity>
           </View>
-        }
-      >
+        }>
         <TextInput
           value={inputs.title}
           onChangeText={(txt) => setInputs((d) => ({ ...d, title: txt }))}
@@ -65,14 +101,12 @@ export default function CreateTask() {
         <View style={styles.dateBox}>
           <TouchableOpacity
             onPress={() => setShowDate(true)}
-            style={styles.dateButtons}
-          >
+            style={styles.dateButtons}>
             <Text style={{ color: "white" }}>{inputs.date.toDateString()}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setShowTime(true)}
-            style={styles.dateButtons}
-          >
+            style={styles.dateButtons}>
             <Text style={{ color: "white" }}>
               {getTimeFromDate(inputs.time)}
             </Text>
@@ -90,7 +124,7 @@ export default function CreateTask() {
           date={inputs.time}
           show={showTime}
         />
-        <Button title="Save" />
+        <Button onPress={handleSubmit} title="Save" />
       </ParallaxScrollView>
     </KeyboardAvoidingView>
   );
