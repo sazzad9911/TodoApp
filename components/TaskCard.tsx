@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import CheckBox from "./CheckBox";
 import getTimeFromDate from "@/utils/getTimeFromDate";
@@ -22,6 +22,9 @@ export default function TaskCard({
 }) {
   const [checked, setCheck] = useState(check);
   //console.log(check);
+  useEffect(()=>{
+    setCheck(check)
+  },[check,id])
   return (
     <TouchableOpacity
       onPress={() => router.push(`/details/${id}`)}

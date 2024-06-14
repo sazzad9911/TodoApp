@@ -20,6 +20,8 @@ import { getTask, storeTask, updateTask } from "@/utils/storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import ThemeTextInput from "@/components/TextInput";
+import { useIsFocused } from "@react-navigation/native";
+import * as Notifications from "expo-notifications";
 
 interface InputTypes {
   title: string;
@@ -35,6 +37,16 @@ interface TasksTypes {
   user: string;
   check: boolean;
 }
+async function scheduleNotification(title: string, id: string, dueDate: Date) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Task Reminder",
+      body: `${title}`,
+      data: { taskId: id },
+    },
+    trigger: dueDate,
+  });
+}
 export default function Edit() {
   const [inputs, setInputs] = useState<InputTypes>({
     title: "",
@@ -47,6 +59,7 @@ export default function Edit() {
   const [showTime, setShowTime] = useState(false);
   const { session } = useSession();
   const [data, setData] = useState<TasksTypes>();
+  const isFocused = useIsFocused();
 
   const onChangeDate = (event: any, date: any) => {
     setShowDate(false);
@@ -80,6 +93,7 @@ export default function Edit() {
       dueDate.setMinutes(inputs.time.getMinutes());
       dueDate.setSeconds(inputs.time.getSeconds());
       await updateTask(inputs.title, image, dueDate, id as string);
+      scheduleNotification(inputs.title, id as string, dueDate);
       router.back();
     } catch (error: any) {
       console.log(error);
@@ -91,15 +105,21 @@ export default function Edit() {
     const getData = async () => {
       try {
         const localData = await getTask(id as string);
-        localData&&setInputs(d=>({...d,title:localData.title,date:new Date(localData.date),time:new Date(localData.date)}))
-        localData&&setImage(localData.image)
+        localData &&
+          setInputs((d) => ({
+            ...d,
+            title: localData.title,
+            date: new Date(localData.date),
+            time: new Date(localData.date),
+          }));
+        localData && setImage(localData.image);
         setData(localData);
       } catch (error) {
         console.error(error);
       }
     };
     getData();
-  }, [id]);
+  }, [id, isFocused]);
   if (!data) {
     return null;
   }
@@ -110,8 +130,7 @@ export default function Edit() {
         headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
         headerImage={
           <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             {image ? (
               <Image source={{ uri: image }} style={styles.reactLogo} />
             ) : (
@@ -121,8 +140,7 @@ export default function Edit() {
               <MaterialIcons name="photo-camera" size={24} color="white" />
             </TouchableOpacity>
           </View>
-        }
-      >
+        }>
         <ThemeTextInput
           value={inputs.title}
           onChangeText={(txt) => setInputs((d) => ({ ...d, title: txt }))}
@@ -132,14 +150,12 @@ export default function Edit() {
         <View style={styles.dateBox}>
           <TouchableOpacity
             onPress={() => setShowDate(true)}
-            style={styles.dateButtons}
-          >
+            style={styles.dateButtons}>
             <Text style={{ color: "white" }}>{inputs.date.toDateString()}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setShowTime(true)}
-            style={styles.dateButtons}
-          >
+            style={styles.dateButtons}>
             <Text style={{ color: "white" }}>
               {getTimeFromDate(inputs.time)}
             </Text>
@@ -157,7 +173,10 @@ export default function Edit() {
           date={inputs.time}
           show={showTime}
         />
-        <Button onPress={()=>router.push(`/images/${id}`)} title="Edit Images" />
+        <Button
+          onPress={() => router.push(`/images/${id}`)}
+          title="Edit Images"
+        />
         <Button onPress={handleSubmit} title="Save" />
       </ParallaxScrollView>
     </KeyboardAvoidingView>

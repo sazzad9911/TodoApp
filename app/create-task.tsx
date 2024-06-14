@@ -20,11 +20,22 @@ import { storeTask } from "@/utils/storage";
 import { router } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import ThemeTextInput from "@/components/TextInput";
+import * as Notifications from "expo-notifications";
 
 interface InputTypes {
   title: string;
   date: Date;
   time: Date;
+}
+async function scheduleNotification(title: string, id: string, dueDate: Date) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Task Reminder",
+      body: `${title}`,
+      data: { taskId: id },
+    },
+    trigger: dueDate,
+  });
 }
 
 export default function CreateTask() {
@@ -69,9 +80,15 @@ export default function CreateTask() {
       dueDate.setHours(inputs.time.getHours());
       dueDate.setMinutes(inputs.time.getMinutes());
       dueDate.setSeconds(inputs.time.getSeconds());
-      await storeTask(inputs.title, image, dueDate, session as string);
+      const d = await storeTask(
+        inputs.title,
+        image,
+        dueDate,
+        session as string
+      );
+      scheduleNotification(inputs.title, d.id, dueDate);
       router.back();
-    } catch (error:any) {
+    } catch (error: any) {
       console.log(error);
       Alert.alert(error.message);
     }

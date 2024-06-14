@@ -41,7 +41,7 @@ export const findUser = async (value: UserTypes) => {
     const oldValue = await AsyncStorage.getItem('users') as string
     const userList = JSON.parse(oldValue) as UserTypes[]
     //console.log(userList)
-    if (userList.find(usr => usr.email === value.email && usr.password === value.password)) {
+    if (userList?.find(usr => usr.email === value.email && usr.password === value.password)) {
         return `${value.email}+${value.password}`
     }
     return null
@@ -64,9 +64,7 @@ export const storeTask = async (title: string, image: string, dueDate: Date, use
             List.push(d)
         })
     }
-
-
-    List.push({
+    const d = {
         id: uuid.v1().toString(),
         date: new Date(),
         dueDate: dueDate,
@@ -74,9 +72,11 @@ export const storeTask = async (title: string, image: string, dueDate: Date, use
         user: user,
         title: title,
         check: false
-    })
+    }
+    List.push(d)
     const jsonValue = JSON.stringify(List);
-    return await AsyncStorage.setItem('tasks', jsonValue);
+    await AsyncStorage.setItem('tasks', jsonValue);
+    return d
 }
 export const allTask = async (user: string) => {
     const oldValue = await AsyncStorage.getItem('tasks') as string

@@ -17,6 +17,7 @@ import { useSession } from "@/providers/authProvider";
 import { useIsFocused } from "@react-navigation/native";
 import { allTask, deleteTask } from "@/utils/storage";
 
+
 interface TasksTypes {
   title: string;
   image: string;
@@ -26,6 +27,8 @@ interface TasksTypes {
   user: string;
   check: boolean;
 }
+
+
 export default function HomeScreen() {
   const [data, setData] = useState<TasksTypes[]>([]);
   const { session } = useSession();
@@ -42,6 +45,7 @@ export default function HomeScreen() {
     };
     getData();
   }, [isFocused, reload]);
+  
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -50,8 +54,7 @@ export default function HomeScreen() {
           source={require("@/assets/images/task.jpg")}
           style={styles.reactLogo}
         />
-      }
-    >
+      }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Tasks</ThemedText>
         <TouchableOpacity onPress={() => router.push("/create-task")}>

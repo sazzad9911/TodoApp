@@ -3,18 +3,32 @@
 ### Recommended to run the app using node Version with (LTS) such- 20.14.0, 18.20.3
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Before Starting
+
+1. Running no emulator
+   
+   Download [android studio](https://developer.android.com/studio?gad_source=1&gclid=CjwKCAjw1K-zBhBIEiwAWeCOFwd9UzxDiivzp4-Sy9QxfpLSn2ixjD4bTfTA6tYlW9_vvnL0bIhyExoCNRgQAvD_BwE&gclsrc=aw.ds) and create a emulator.
+
+   For iOS download Xcode from APP STORE
+
+2. Running on Mobile device
+   
+   For Android download Expo Go from Play Store
+   For iOS download Expo Go from APP STORE
+
+
 ## Get started
 
-1. Install dependencies
+1. Clone the repository
 
    ```bash
-   npm install
+   git clone https://github.com/sazzad9911/TodoApp.git
    ```
 
-2. Start the app
+2. Install dependencies
 
    ```bash
-    npx expo start
+    npm install
    ```
 
 In the output, you'll find options to open the app in a

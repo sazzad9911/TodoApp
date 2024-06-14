@@ -4,7 +4,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
@@ -15,11 +15,56 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BackHeader from "@/components/BackHeader";
 import { StatusBar } from "expo-status-bar";
+import * as Notifications from 'expo-notifications';
+import * as Linking from 'expo-linking';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+  
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,  // Sound is handled manually
+      shouldSetBadge: true,
+    };
+  },
+});
+function useNotificationObserver() {
+  useEffect(() => {
+    let isMounted = true;
+
+    function redirect(notification: Notifications.Notification) {
+      
+      const taskId = notification.request.content.data?.taskId;
+      console.log(taskId)
+      if (taskId) {
+        Linking.openURL(`myapp://details/${taskId}`);
+      }
+    }
+
+    Notifications.getLastNotificationResponseAsync()
+      .then(response => {
+        if (!isMounted || !response?.notification) {
+          return;
+        }
+        redirect(response?.notification);
+      });
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      redirect(response.notification);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.remove();
+    };
+  }, []);
+}
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  useNotificationObserver()
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
