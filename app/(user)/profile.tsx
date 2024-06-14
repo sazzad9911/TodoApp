@@ -28,8 +28,8 @@ export default function Profile() {
         This is your profile section. This account can't be accessible from
         another device
       </ThemedText>
-      <Text style={{fontSize:20}}>Your Primary Email</Text>
-      <Text>{session?.split("+")[0]}</Text>
+      <ThemedText style={{fontSize:20}}>Your Primary Email</ThemedText>
+      <ThemedText>{session?.split("+")[0]}</ThemedText>
       <Button onPress={()=>{
         signOut()
         router.replace("/login")

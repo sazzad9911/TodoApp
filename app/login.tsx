@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -9,9 +8,11 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import Button from "@/components/Button";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useSession } from "@/providers/authProvider";
 import { findUser } from "@/utils/storage";
+import { ThemedText } from "@/components/ThemedText";
+import ThemeTextInput from "@/components/TextInput";
 
 interface InputTypes {
   email: string;
@@ -24,7 +25,7 @@ export default function Login() {
     email: "",
     password: "",
   });
-  const { signIn } = useSession();
+  const { signIn, session } = useSession();
   const handleLogin = async () => {
     setErrors(["", ""]);
     if (!inputs.email) setErrors(["Enter email", ""]);
@@ -38,12 +39,15 @@ export default function Login() {
       Alert.alert(error.message);
     }
   };
+  if (session) {
+    return <Redirect href="/" />;
+  }
   return (
     <KeyboardAvoidingView style={styles.container}>
-      <Text style={styles.headline}>Login Here</Text>
-      <Text></Text>
+      <ThemedText style={styles.headline}>Login Here</ThemedText>
+
       <View>
-        <TextInput
+        <ThemeTextInput
           value={inputs.email}
           onChangeText={(text) => setInputs((d) => ({ ...d, email: text }))}
           style={styles.inputs}
@@ -52,7 +56,7 @@ export default function Login() {
         {errors[0] && <Text style={{ color: "red" }}>*{errors?.[0]}</Text>}
       </View>
       <View>
-        <TextInput
+        <ThemeTextInput
           value={inputs.password}
           onChangeText={(pass) => setInputs((d) => ({ ...d, password: pass }))}
           secureTextEntry
@@ -63,16 +67,16 @@ export default function Login() {
         {errors[1] && <Text style={{ color: "red" }}>*{errors?.[1]}</Text>}
       </View>
       <View style={styles.box}>
-        <Text>Not Registered yet?</Text>
+        <ThemedText>Not Registered yet?</ThemedText>
         <TouchableOpacity onPress={() => router.push("/signup")}>
-          <Text
+          <ThemedText
             style={{
               textDecorationLine: "underline",
               textDecorationColor: "#0082D6",
             }}
           >
             Sign Up
-          </Text>
+          </ThemedText>
         </TouchableOpacity>
       </View>
       <Button onPress={handleLogin} title="Login" />

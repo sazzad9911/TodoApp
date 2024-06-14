@@ -80,13 +80,13 @@ export const storeTask = async (title: string, image: string, dueDate: Date, use
 }
 export const allTask = async (user: string) => {
     const oldValue = await AsyncStorage.getItem('tasks') as string
-    const jsonValue = JSON.parse(oldValue) as TasksTypes[]
+    const jsonValue = oldValue ? JSON.parse(oldValue) as TasksTypes[] : []
 
     return jsonValue.filter(d => d.user === user)
 }
 export const checkTask = async (id: string, check: boolean) => {
     const oldValue = await AsyncStorage.getItem('tasks') as string
-    const data = JSON.parse(oldValue) as TasksTypes[]
+    const data = oldValue ? JSON.parse(oldValue) as TasksTypes[] : []
     const newVal = data.map(d => {
         if (d.id === id) {
             return {
@@ -100,16 +100,16 @@ export const checkTask = async (id: string, check: boolean) => {
     const jsonValue = JSON.stringify(newVal);
     return await AsyncStorage.setItem('tasks', jsonValue);
 }
-export const updateTask = async (title: string, image: string, dueDate: Date,id:string) => {
+export const updateTask = async (title: string, image: string, dueDate: Date, id: string) => {
     const oldValue = await AsyncStorage.getItem('tasks') as string
-    const data = JSON.parse(oldValue) as TasksTypes[]
+    const data = oldValue ? JSON.parse(oldValue) as TasksTypes[] : []
     const newVal = data.map(d => {
         if (d.id === id) {
             return {
                 ...d,
-                title:title,
-                image:image,
-                dueDate:dueDate,
+                title: title,
+                image: image,
+                dueDate: dueDate,
             }
         }
         return d
@@ -118,17 +118,53 @@ export const updateTask = async (title: string, image: string, dueDate: Date,id:
     const jsonValue = JSON.stringify(newVal);
     return await AsyncStorage.setItem('tasks', jsonValue);
 }
-export const deleteTask = async (id:string) => {
+export const deleteTask = async (id: string) => {
     const oldValue = await AsyncStorage.getItem('tasks') as string
-    const data = JSON.parse(oldValue) as TasksTypes[]
-    const newVal = data.filter(d=>d.id!=id)
+    const data = oldValue ? JSON.parse(oldValue) as TasksTypes[] : []
+    const newVal = data.filter(d => d.id != id)
     //console.log(newVal)
     const jsonValue = JSON.stringify(newVal);
     return await AsyncStorage.setItem('tasks', jsonValue);
 }
 export const getTask = async (id: string) => {
     const oldValue = await AsyncStorage.getItem('tasks') as string
-    const data = JSON.parse(oldValue) as TasksTypes[]
+    const data = oldValue ? JSON.parse(oldValue) as TasksTypes[] : []
 
-    return data.find(d=>d.id===id)
+    return data.find(d => d.id === id)
+}
+interface ImagesTypes {
+    uri: string,
+    id: string,
+    taskId: string
+}
+export const addImage = async (taskId: string, uri: string) => {
+    const oldValue = await AsyncStorage.getItem('images');
+    let List: ImagesTypes[] = []
+    if (oldValue) {
+        const old = JSON.parse(oldValue) as ImagesTypes[]
+        old?.map(d => {
+            List.push(d)
+        })
+    }
+    List.push({
+        id: uuid.v1().toString(),
+        taskId: taskId,
+        uri: uri
+    })
+    const jsonValue = JSON.stringify(List);
+    return await AsyncStorage.setItem('images', jsonValue);
+}
+export const allImages = async (taskId: string) => {
+    const oldValue = await AsyncStorage.getItem('images') as string
+    const jsonValue = oldValue ? JSON.parse(oldValue) as ImagesTypes[] : []
+
+    return jsonValue.filter(d => d.taskId === taskId)
+}
+export const deleteImage = async (imageId: string) => {
+    const oldValue = await AsyncStorage.getItem('images') as string
+    const data = oldValue ? JSON.parse(oldValue) as ImagesTypes[] : []
+    const newVal = data.filter(d => d.id != imageId)
+    //console.log(newVal)
+    const jsonValue = JSON.stringify(newVal);
+    return await AsyncStorage.setItem('images', jsonValue);
 }

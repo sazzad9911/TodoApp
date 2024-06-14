@@ -3,14 +3,15 @@ import {
   Text,
   StyleSheet,
   KeyboardAvoidingView,
-  TextInput,
   Alert,
 } from "react-native";
 import React, { useState } from "react";
 import Button from "@/components/Button";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { storeUser } from "@/utils/storage";
 import { useSession } from "@/providers/authProvider";
+import ThemeTextInput from "@/components/TextInput";
+import { ThemedText } from "@/components/ThemedText";
 interface InputTypes {
   email: string;
   password: string;
@@ -21,7 +22,7 @@ export default function SignUp() {
     email: "",
     password: "",
   });
-  const { signIn } = useSession();
+  const { signIn, session } = useSession();
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -33,22 +34,25 @@ export default function SignUp() {
     if (!inputs.password) setErrors(["", "Enter password"]);
     try {
       const code = (await storeUser(inputs)) as string | null;
-      if(!code) return Alert.alert("Email is already in use")
+      if (!code) return Alert.alert("Email is already in use");
       signIn(code);
-      router.replace("/")
+      router.replace("/");
     } catch (error: any) {
       Alert.alert(error.message);
     }
   };
+  if (session) {
+    return <Redirect href="/" />;
+  }
   return (
     <KeyboardAvoidingView style={styles.container}>
-      <Text style={styles.headline}>Sign Up Now</Text>
-      <Text>
+      <ThemedText style={styles.headline}>Sign Up Now</ThemedText>
+      <ThemedText>
         This is local sign-up only. The app is not connected with any server.
         Use any valid email and any length password
-      </Text>
+      </ThemedText>
       <View>
-        <TextInput
+        <ThemeTextInput
           value={inputs.email}
           onChangeText={(text) => setInputs((d) => ({ ...d, email: text }))}
           style={styles.inputs}
@@ -57,7 +61,7 @@ export default function SignUp() {
         {errors[0] && <Text style={{ color: "red" }}>*{errors?.[0]}</Text>}
       </View>
       <View>
-        <TextInput
+        <ThemeTextInput
           value={inputs.password}
           onChangeText={(pass) => setInputs((d) => ({ ...d, password: pass }))}
           secureTextEntry

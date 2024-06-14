@@ -18,6 +18,8 @@ import * as ImagePicker from "expo-image-picker";
 import { useSession } from "@/providers/authProvider";
 import { storeTask } from "@/utils/storage";
 import { router } from "expo-router";
+import { ThemedText } from "@/components/ThemedText";
+import ThemeTextInput from "@/components/TextInput";
 
 interface InputTypes {
   title: string;
@@ -85,14 +87,14 @@ export default function CreateTask() {
             {image ? (
               <Image source={{ uri: image }} style={styles.reactLogo} />
             ) : (
-              <Text>No image Uploaded</Text>
+              <ThemedText>No image Uploaded</ThemedText>
             )}
             <TouchableOpacity onPress={pickImage} style={styles.cameraIcon}>
               <MaterialIcons name="photo-camera" size={24} color="white" />
             </TouchableOpacity>
           </View>
         }>
-        <TextInput
+        <ThemeTextInput
           value={inputs.title}
           onChangeText={(txt) => setInputs((d) => ({ ...d, title: txt }))}
           style={styles.input}

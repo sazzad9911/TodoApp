@@ -5,6 +5,7 @@ import CheckBox from "./CheckBox";
 import getTimeFromDate from "@/utils/getTimeFromDate";
 import { router } from "expo-router";
 import { checkTask } from "@/utils/storage";
+import { ThemedText } from "./ThemedText";
 
 export default function TaskCard({
   title,
@@ -22,7 +23,8 @@ export default function TaskCard({
   const [checked, setCheck] = useState(check);
   //console.log(check);
   return (
-    <TouchableOpacity onPress={()=>router.push(`/details/${id}`)}
+    <TouchableOpacity
+      onPress={() => router.push(`/details/${id}`)}
       style={{
         flexDirection: "row",
         justifyContent: "space-between",
@@ -31,35 +33,41 @@ export default function TaskCard({
         paddingBottom: 5,
         borderBottomColor: "#e6e6e6",
         flex: 1,
-      }}>
+      }}
+    >
       <View
         style={{
           flexDirection: "row",
           gap: 10,
           alignItems: "center",
           flex: 1,
-        }}>
-        <CheckBox checked={checked} onChange={async() =>{
-          await checkTask(id,!checked)
-          setCheck((v) => !v)
-        } } />
+        }}
+      >
+        <CheckBox
+          checked={checked}
+          onChange={async () => {
+            await checkTask(id, !checked);
+            setCheck((v) => !v);
+          }}
+        />
         <View style={{ flex: 1 }}>
-          <Text
+          <ThemedText
             numberOfLines={2}
             style={{
               fontSize: 16,
               fontWeight: "600",
               flex: 1,
-            }}>
+            }}
+          >
             {title}
-          </Text>
-          <Text style={{ flex: 1 }}>
+          </ThemedText>
+          <ThemedText style={{ flex: 1 }}>
             Due- {new Date(dueDate).toLocaleString()}
-          </Text>
+          </ThemedText>
         </View>
       </View>
       <View style={{ flexDirection: "row", gap: 10, marginLeft: 10 }}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/images/${id}`)}>
           <MaterialCommunityIcons
             name="file-image-plus-outline"
             size={24}

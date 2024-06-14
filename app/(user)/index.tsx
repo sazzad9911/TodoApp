@@ -50,7 +50,8 @@ export default function HomeScreen() {
           source={require("@/assets/images/task.jpg")}
           style={styles.reactLogo}
         />
-      }>
+      }
+    >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Tasks</ThemedText>
         <TouchableOpacity onPress={() => router.push("/create-task")}>
@@ -70,6 +71,9 @@ export default function HomeScreen() {
           key={i}
         />
       ))}
+      {data.length === 0 && (
+        <ThemedText type="defaultSemiBold">No Tasks!</ThemedText>
+      )}
     </ParallaxScrollView>
   );
 }

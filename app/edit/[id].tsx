@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { MaterialIcons } from "@expo/vector-icons";
 import Button from "@/components/Button";
@@ -16,25 +16,37 @@ import DateTime from "@/components/DateTime";
 import getTimeFromDate from "@/utils/getTimeFromDate";
 import * as ImagePicker from "expo-image-picker";
 import { useSession } from "@/providers/authProvider";
-import { storeTask } from "@/utils/storage";
-import { router } from "expo-router";
+import { getTask, storeTask, updateTask } from "@/utils/storage";
+import { router, useLocalSearchParams } from "expo-router";
+import { ThemedText } from "@/components/ThemedText";
+import ThemeTextInput from "@/components/TextInput";
 
 interface InputTypes {
   title: string;
   date: Date;
   time: Date;
 }
-
+interface TasksTypes {
+  title: string;
+  image: string;
+  id: string;
+  dueDate: Date;
+  date: Date;
+  user: string;
+  check: boolean;
+}
 export default function Edit() {
   const [inputs, setInputs] = useState<InputTypes>({
     title: "",
     date: new Date(),
     time: new Date(),
   });
+  const { id } = useLocalSearchParams();
   const [image, setImage] = useState<string | null>(null);
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
   const { session } = useSession();
+  const [data, setData] = useState<TasksTypes>();
 
   const onChangeDate = (event: any, date: any) => {
     setShowDate(false);
@@ -67,13 +79,30 @@ export default function Edit() {
       dueDate.setHours(inputs.time.getHours());
       dueDate.setMinutes(inputs.time.getMinutes());
       dueDate.setSeconds(inputs.time.getSeconds());
-      await storeTask(inputs.title, image, dueDate, session as string);
+      await updateTask(inputs.title, image, dueDate, id as string);
       router.back();
-    } catch (error:any) {
+    } catch (error: any) {
       console.log(error);
       Alert.alert(error.message);
     }
   };
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const localData = await getTask(id as string);
+        localData&&setInputs(d=>({...d,title:localData.title,date:new Date(localData.date),time:new Date(localData.date)}))
+        localData&&setImage(localData.image)
+        setData(localData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getData();
+  }, [id]);
+  if (!data) {
+    return null;
+  }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
@@ -81,18 +110,20 @@ export default function Edit() {
         headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
         headerImage={
           <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
             {image ? (
               <Image source={{ uri: image }} style={styles.reactLogo} />
             ) : (
-              <Text>No image Uploaded</Text>
+              <ThemedText>No image Uploaded</ThemedText>
             )}
             <TouchableOpacity onPress={pickImage} style={styles.cameraIcon}>
               <MaterialIcons name="photo-camera" size={24} color="white" />
             </TouchableOpacity>
           </View>
-        }>
-        <TextInput
+        }
+      >
+        <ThemeTextInput
           value={inputs.title}
           onChangeText={(txt) => setInputs((d) => ({ ...d, title: txt }))}
           style={styles.input}
@@ -101,12 +132,14 @@ export default function Edit() {
         <View style={styles.dateBox}>
           <TouchableOpacity
             onPress={() => setShowDate(true)}
-            style={styles.dateButtons}>
+            style={styles.dateButtons}
+          >
             <Text style={{ color: "white" }}>{inputs.date.toDateString()}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setShowTime(true)}
-            style={styles.dateButtons}>
+            style={styles.dateButtons}
+          >
             <Text style={{ color: "white" }}>
               {getTimeFromDate(inputs.time)}
             </Text>
@@ -124,6 +157,7 @@ export default function Edit() {
           date={inputs.time}
           show={showTime}
         />
+        <Button onPress={()=>router.push(`/images/${id}`)} title="Edit Images" />
         <Button onPress={handleSubmit} title="Save" />
       </ParallaxScrollView>
     </KeyboardAvoidingView>

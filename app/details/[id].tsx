@@ -1,10 +1,21 @@
-import { View, Text, Image, StyleSheet,TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { getTask } from "@/utils/storage";
+import { allImages, getTask } from "@/utils/storage";
 import getTimeFromDate from "@/utils/getTimeFromDate";
 import { MaterialIcons } from "@expo/vector-icons";
+import { ThemedText } from "@/components/ThemedText";
+import { Feather } from "@expo/vector-icons";
+import { ThemedView } from "@/components/ThemedView";
+import { useIsFocused } from "@react-navigation/native";
 interface TasksTypes {
   title: string;
   image: string;
@@ -14,22 +25,34 @@ interface TasksTypes {
   user: string;
   check: boolean;
 }
+interface ImagesTypes {
+  uri: string;
+  id: string;
+  taskId: string;
+}
+const { width, height } = Dimensions.get("window");
 export default function Id() {
   const [data, setData] = useState<TasksTypes>();
   const { id } = useLocalSearchParams();
+  const [imageData, setImageData] = useState<ImagesTypes[]>([]);
+  const isFocused = useIsFocused();
+
   useEffect(() => {
     const getData = async () => {
       try {
         const localData = await getTask(id as string);
         setData(localData);
+        const images = await allImages(id as string);
+        setImageData(images);
+        //console.log(images.length)
       } catch (error) {
         console.error(error);
       }
     };
     getData();
-  }, [id]);
-  if(!data){
-    return null
+  }, [id, isFocused]);
+  if (!data) {
+    return null;
   }
 
   return (
@@ -37,26 +60,44 @@ export default function Id() {
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           {data?.image ? (
             <Image source={{ uri: data.image }} style={styles.reactLogo} />
           ) : (
-            <Text>No image Uploaded</Text>
+            <ThemedText>No image Uploaded</ThemedText>
           )}
-          <TouchableOpacity  style={styles.cameraIcon}>
-            <MaterialIcons name="photo-camera" size={24} color="white" />
+          <TouchableOpacity
+            onPress={() => {
+              router.push(`/edit/${id}`);
+            }}
+            style={styles.cameraIcon}
+          >
+            <Feather name="edit" size={20} color="white" />
           </TouchableOpacity>
         </View>
-      }>
-      <Text>{data.title}</Text>
+      }
+    >
+      <ThemedText type="subtitle">{data.title}</ThemedText>
       <View style={styles.dateBox}>
-        <View
-          style={styles.dateButtons}>
-          <Text style={{ color: "white" }}>{new Date(data.dueDate).toDateString()}</Text>
+        <View style={styles.dateButtons}>
+          <Text style={{ color: "white" }}>
+            {new Date(data.dueDate).toDateString()}
+          </Text>
         </View>
         <View style={styles.dateButtons}>
-          <Text style={{ color: "white" }}>{getTimeFromDate(new Date(data.dueDate))}</Text>
+          <Text style={{ color: "white" }}>
+            {getTimeFromDate(new Date(data.dueDate))}
+          </Text>
         </View>
+      </View>
+
+      <ThemedText type="default">Include Images</ThemedText>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+        {imageData.map((doc, i) => (
+          <Image style={styles.image} source={{ uri: doc.uri }} key={i} />
+        ))}
+        {imageData.length === 0 && <ThemedText type="defaultSemiBold">No Image!</ThemedText>}
       </View>
     </ParallaxScrollView>
   );
@@ -97,5 +138,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 15,
+  },
+  image: {
+    width: width / 2 - 37,
+    height: width / 2 - 37,
   },
 });
