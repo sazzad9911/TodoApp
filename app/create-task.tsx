@@ -117,6 +117,7 @@ export default function CreateTask() {
           style={styles.input}
           placeholder="Title"
         />
+        <ThemedText>Due Time</ThemedText>
         <View style={styles.dateBox}>
           <TouchableOpacity
             onPress={() => setShowDate(true)}

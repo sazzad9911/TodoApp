@@ -1,21 +1,8 @@
 # Instruction for run the app 👋
 
 ### Recommended to run the app using node Version with (LTS) such- 20.14.0, 18.20.3
+
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Before Starting
-
-1. Running no emulator
-   
-   Download [android studio](https://developer.android.com/studio?gad_source=1&gclid=CjwKCAjw1K-zBhBIEiwAWeCOFwd9UzxDiivzp4-Sy9QxfpLSn2ixjD4bTfTA6tYlW9_vvnL0bIhyExoCNRgQAvD_BwE&gclsrc=aw.ds) and create a emulator.
-
-   For iOS download Xcode from APP STORE
-
-2. Running on Mobile device
-   
-   For Android download Expo Go from Play Store
-   For iOS download Expo Go from APP STORE
-
 
 ## Get started
 
@@ -31,14 +18,56 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
     npm install
    ```
 
-In the output, you'll find options to open the app in a
+## Before Starting
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1. Running on Mobile/Emulator with soft run
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+   For Android download Expo Go from Play Store
+   For iOS download Expo Go from APP STORE
+
+   Then run
+
+   ```bash
+    npm start
+   ```
+   Type 'a' for android and 'i' for run in ios 'w' for web. For run on mobile device scan thr QR code given in the terminal from Expo Go app.
+
+2. Running on emulator/mobile with native build
+
+   Download [android studio](https://developer.android.com/studio?gad_source=1&gclid=CjwKCAjw1K-zBhBIEiwAWeCOFwd9UzxDiivzp4-Sy9QxfpLSn2ixjD4bTfTA6tYlW9_vvnL0bIhyExoCNRgQAvD_BwE&gclsrc=aw.ds) and create an emulator.
+
+   For iOS download Xcode from APP STORE and create an emulator.
+
+   #### Setup environment
+
+   This is the complete document for setup environment
+   [Set Up Environment](https://reactnative.dev/docs/set-up-your-environment)
+
+   After setup complete-
+   For ios
+   ```bash
+    npm run ios
+   ```
+   For android
+   ```bash
+    npm run android
+   ```
+
+## App Features
+
+- Login and Sign up using local storage, Session token will be stored into secret storage
+
+- One account can access only that account tasks.
+
+- One account can create task with title, date, time and image. Also can edit task, delete task and add multiple picture into a single task. Also can remove pictures of tasks.
+
+- Add task with plus button, Delete task o click delete icon, log out into profile tab bar.
+
+- Task pictures can upload from custom gallery with filter albums
+
+- One account will notified when task due time arrive, Notification will show both soft run and native build. But on click the notification will redirect the task details page will only be happen on native build only.(Because there need to configure deep linking, and the deep link will work only when the application is installed into a device)
+
+Note: Don't close the app from background when run into native build. Because it connected to your local server which gives update if any code changes.
 
 ## Get a fresh project
 
